@@ -72,7 +72,7 @@ def Processamento(arquivo):
 
 import socket
 
-#define o host e a porta de conexão que a parte passiva irá receber conexões
+#define o host e a porta de conexão que o servidor irá receber conexões
 HOST = ''
 PORT = 5000
 
@@ -95,7 +95,7 @@ while True:
     arquivo = str(msg, encoding = 'utf-8')
     #caso receba a palavra chave entra no if
     if arquivo == "encerrar" :
-        #encerra a conexão com a parte passiva
+        #encerra a conexão com o cliente
         novo_socket.close()
         #fica aguardando uma nova requisição de conexão no host:porta determinado previamente
         novo_socket, endereco = socket_passivo.accept()

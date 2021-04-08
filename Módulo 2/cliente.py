@@ -17,10 +17,10 @@ while True:
     socket_ativo.send(str.encode(arquivo))
     #encerra se for palavra chave
     if arquivo == 'encerrar' : break
-    #recebe a mensagem da parte passiva
+    #recebe a mensagem do servidor
     palavras = socket_ativo.recv(1024)
-    #printa a mensagem recebida, ou seja, um echo da mensagem enviada
+    #printa a string recebida, podendo ser a ocorrencia das palavras ou que o arquivo não existe
     print(str(palavras, encoding = 'utf-8'))
 
-#encerra o socket ativo e a conexão com a parte passiva
+#encerra o socket ativo e a conexão com o servidor
 socket_ativo.close()
