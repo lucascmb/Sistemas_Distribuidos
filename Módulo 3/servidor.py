@@ -168,7 +168,7 @@ def Servidor():
                 #estabelece conexão com o cliente, instanciando um novo socket
                 cliente_socket, endereco = AceitaConexao(server_socket)
                 
-                print("\nServidor conectado com : ", endereco + "\n")
+                print("\nServidor conectado com : ", endereco)
                 #cria uma nova thread (um novo fluxo) para atender as requisições do cliente com o qual a conexão foi estabelecida por socket
                 thread_cliente = threading.Thread(target = AtendeRequisicoes, args = (cliente_socket, endereco))
                 #inicializa a thread
