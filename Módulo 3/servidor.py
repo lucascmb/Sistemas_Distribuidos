@@ -150,46 +150,52 @@ def AtendeRequisicoes(cliente_socket, endereco):
             cliente_socket.send(str.encode(retorno))
         
 
-    
-clientes = []
 
-#Inicializa o servidor
-server_socket = InicializaServidor()
+def Servidor():
+    clientes = []
 
-while True:
-    
-    #espera por entradas, sejam elas conexões de clientes ou entradas de texto no próprio servidor
-    leitura, escrita, excecao = select.select(entradas, [], [])
-    
-    for pronto in leitura :
-        #se houver um pedido novo de conexão vindo de um cliente
-        if pronto == server_socket:
-            #estabelece conexão com o cliente, instanciando um novo socket
-            cliente_socket, endereco = AceitaConexao(server_socket)
-            
-            print("Servidor conectado com : ", endereco)
-            #cria uma nova thread (um novo fluxo) para atender as requisições do cliente com o qual a conexão foi estabelecida por socket
-            thread_cliente = threading.Thread(target = AtendeRequisicoes, args = (cliente_socket, endereco))
-            #inicializa a thread
-            thread_cliente.start()
-            
-            clientes.append(thread_cliente)
+    #Inicializa o servidor
+    server_socket = InicializaServidor()
+
+    while True:
         
-        #se a entrada for um entrada padrão
-        elif pronto == sys.stdin:
-            
-            comando = input()
-            
-            if comando == 'historico':
-                print(str(conexoes.values()))
+        #espera por entradas, sejam elas conexões de clientes ou entradas de texto no próprio servidor
+        leitura, escrita, excecao = select.select(entradas, [], [])
+        
+        for pronto in leitura :
+            #se houver um pedido novo de conexão vindo de um cliente
+            if pronto == server_socket:
+                #estabelece conexão com o cliente, instanciando um novo socket
+                cliente_socket, endereco = AceitaConexao(server_socket)
                 
-            elif comando == 'help' :
-                print("digite 'encerrar servidor' para encerrar o servidor. \n Esse serviço passará a não receber mais conexões com novos clientes, porém só será finalizado após todos os clientes vigentes terem encerrado suas respectivas conexões.\n Também não irá receber mais comandos de entrada padrão.")
-                print("digite 'historico' para exibir as conexões vigentes")    
+                print("Servidor conectado com : ", endereco)
+                #cria uma nova thread (um novo fluxo) para atender as requisições do cliente com o qual a conexão foi estabelecida por socket
+                thread_cliente = threading.Thread(target = AtendeRequisicoes, args = (cliente_socket, endereco))
+                #inicializa a thread
+                thread_cliente.start()
                 
-            elif comando == 'encerrar servidor':
-                for c in clientes:
-                    c.join()
-                server_socket.close()
-                sys.exit()
+                clientes.append(thread_cliente)
+            
+            #se a entrada for um entrada padrão
+            elif pronto == sys.stdin:
+                
+                comando = input()
+                
+                if comando == 'historico':
+                    print('')
+                    for con in conexoes:
+                        print(str(con[0]) + ":" + str(con[1]))
+                    print('')
+                    
+                elif comando == 'help' :
+                    print("\ndigite 'historico' para exibir as conexões vigentes")    
+                    print("digite 'encerrar servidor' para encerrar o servidor. \nEsse serviço passará a não receber mais conexões com novos clientes, porém só será finalizado após todos os clientes vigentes terem encerrado suas respectivas conexões.\n Também não irá receber mais comandos de entrada padrão.\n")
+                    
+                elif comando == 'encerrar servidor':
+                    for c in clientes:
+                        c.join()
+                    server_socket.close()
+                    sys.exit()
+                    
+Servidor()
 
