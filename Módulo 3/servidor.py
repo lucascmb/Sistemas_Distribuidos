@@ -184,7 +184,7 @@ def Servidor():
                 if comando == 'historico':
                     print('')
                     for con in conexoes:
-                        print(str(con) + ":" + str(conexoes[con]))
+                        print(str(conexoes[con][0]) + ':' + str(conexoes[con][1]))
                     print('')
                     
                 elif comando == 'help' :
