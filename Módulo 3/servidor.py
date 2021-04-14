@@ -1,3 +1,23 @@
+import socket
+import sys
+import select
+import threading
+
+#define o host e a porta de conexão que o servidor irá receber conexões
+HOST = ''
+PORT = 5000
+
+#definição da lista de I/O que será aceita pelo servidor no comando select
+entradas = [sys.stdin]
+
+#dicionario para mapear as conexões do servidor com cada cliente (inicialmente vazio)
+conexoes = {}
+
+lock = threading.Lock()
+
+fileLock = threading.Lock()
+
+
 def AcessoDados(arquivo):
 
     import os.path
@@ -11,6 +31,8 @@ def AcessoDados(arquivo):
     #caso exista, entra no if
     if resultado:
 
+        fileLock.acquire()
+
         #abre o arquivo para leitura
         f = open(caminho, 'r')
 
@@ -19,6 +41,8 @@ def AcessoDados(arquivo):
 
         #fecha o arquivo
         f.close()
+        
+        fileLock.release()
 
         #retorna a string contendo todo o conteudo do arquivo de forma crua
         return palavras
@@ -68,21 +92,6 @@ def Processamento(arquivo):
     return retorno
 
 
-import socket
-import sys
-import select
-import threading
-
-#define o host e a porta de conexão que o servidor irá receber conexões
-HOST = ''
-PORT = 5000
-
-#definição da lista de I/O que será aceita pelo servidor no comando select
-entradas = [sys.stdin]
-
-#dicionario para mapear as conexões do servidor com cada cliente (inicialmente vazio)
-conexoes = {}
-
 #Método para inicializar o servidor
 def InicializaServidor():
 
@@ -126,6 +135,9 @@ def AtendeRequisicoes(cliente_socket, endereco):
         #caso receba a palavra chave entra no if
         if arquivo == "encerrar" :
             print("conexão encerrada com o cliente ", endereco)
+            lock.acquire()
+            del conexoes[cliente_socket]
+            lock.release()
             #encerra a conexão com o cliente
             cliente_socket.close()
             return
