@@ -125,6 +125,8 @@ def AceitaConexao(server_socket):
     lock.acquire()
     conexoes[cliente_socket] = endereco
     lock.release()
+    
+    return cliente_socket, endereco
 
 def AtendeRequisicoes(cliente_socket, endereco):
     while True:
