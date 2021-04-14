@@ -13,11 +13,13 @@ entradas = [sys.stdin]
 #dicionario para mapear as conexões do servidor com cada cliente (inicialmente vazio)
 conexoes = {}
 
+#cria um lock para controlar condição de corrida no acesso ao dicionário conexoes
 lock = threading.Lock()
 
+#cria um lock para controlar condição de corrida ao abrir / fechar um arquivo
 fileLock = threading.Lock()
 
-
+#camada de acesso aos dados
 def AcessoDados(arquivo):
 
     import os.path
@@ -53,7 +55,7 @@ def AcessoDados(arquivo):
         #retorna que o arquivo não existe
         return 'Arquivo não existe'
 
-
+#camada de processamento
 def Processamento(arquivo):
 
     import re
@@ -116,6 +118,7 @@ def InicializaServidor():
     
     return server_socket
 
+#método para aceitar a conexão de cada cliente
 def AceitaConexao(server_socket):
     
     #estabelece conexão com o cliente
@@ -128,6 +131,7 @@ def AceitaConexao(server_socket):
     
     return cliente_socket, endereco
 
+#método para atender requisições de cada cliente
 def AtendeRequisicoes(cliente_socket, endereco):
     while True:
         #espera até receber a mensagem em bytes
@@ -138,6 +142,7 @@ def AtendeRequisicoes(cliente_socket, endereco):
         if arquivo == "encerrar" :
             print("conexão encerrada com o cliente ", endereco)
             lock.acquire()
+            #deleta o socket dessa conexão do dicionário com as conexões e endereços
             del conexoes[cliente_socket]
             lock.release()
             #encerra a conexão com o cliente
@@ -150,8 +155,9 @@ def AtendeRequisicoes(cliente_socket, endereco):
             cliente_socket.send(str.encode(retorno))
         
 
-
+#função MAIN
 def Servidor():
+    #inicializa uma lista vazia que irá armazenar as threads inicializadas para cada conexão com um cliente
     clientes = []
 
     #Inicializa o servidor
@@ -162,9 +168,9 @@ def Servidor():
         #espera por entradas, sejam elas conexões de clientes ou entradas de texto no próprio servidor
         leitura, escrita, excecao = select.select(entradas, [], [])
         
-        for pronto in leitura :
+        for entrada in leitura :
             #se houver um pedido novo de conexão vindo de um cliente
-            if pronto == server_socket:
+            if entrada == server_socket:
                 #estabelece conexão com o cliente, instanciando um novo socket
                 cliente_socket, endereco = AceitaConexao(server_socket)
                 
@@ -173,29 +179,31 @@ def Servidor():
                 thread_cliente = threading.Thread(target = AtendeRequisicoes, args = (cliente_socket, endereco))
                 #inicializa a thread
                 thread_cliente.start()
-                
+                #adiciona a lista de thread a thread criada
                 clientes.append(thread_cliente)
             
             #se a entrada for um entrada padrão
-            elif pronto == sys.stdin:
-                
+            elif entrada == sys.stdin:
+                #recebe um comando de entrada padrão
                 comando = input()
-                
+                #se o comando for 'historico', exibe as conexões ativas com o servidor
                 if comando == 'historico':
                     print("\nServidores conectados : ")
                     for con in conexoes:
                         print('     ' + str(conexoes[con][0]) + ':' + str(conexoes[con][1]))
                     print('')
-                    
+                #se o comando for 'help', exibe os comandos disponíveis do servidor
                 elif comando == 'help' :
                     print("\ndigite 'historico' para exibir as conexões vigentes")    
                     print("digite 'encerrar servidor' para encerrar o servidor. \nEsse serviço passará a não receber mais conexões com novos clientes, porém só será finalizado após todos os clientes vigentes terem encerrado suas respectivas conexões.\nTambém não irá receber mais comandos de entrada padrão.\n")
-                    
+                #se o comand ofor 'encerrar servidor', espera que todos os clientes fechem comexões com o servidor e encerra o servidor, não permitindo nenhuma nova conexão ou entrada padrão nesse tempo.
                 elif comando == 'encerrar servidor':
                     print("Servidor fechado para conexões e entradas padrões. Aguardando finalização por parte dos clientes ativos.")
+                    #faz um join com todas as thread vigentes, aguardando o encerramento de todas para que assim o servidor finalize
                     for c in clientes:
                         c.join()
                     print("Servidor encerrado.")
+                    #encerra o socket e entradas
                     server_socket.close()
                     sys.exit()
                     
