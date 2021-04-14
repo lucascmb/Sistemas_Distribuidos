@@ -168,7 +168,7 @@ def Servidor():
                 #estabelece conexão com o cliente, instanciando um novo socket
                 cliente_socket, endereco = AceitaConexao(server_socket)
                 
-                print("Servidor conectado com : ", endereco)
+                print("\nServidor conectado com : ", endereco + "\n")
                 #cria uma nova thread (um novo fluxo) para atender as requisições do cliente com o qual a conexão foi estabelecida por socket
                 thread_cliente = threading.Thread(target = AtendeRequisicoes, args = (cliente_socket, endereco))
                 #inicializa a thread
@@ -182,18 +182,20 @@ def Servidor():
                 comando = input()
                 
                 if comando == 'historico':
-                    print('')
+                    print("\nServidores conectados : ")
                     for con in conexoes:
-                        print(str(conexoes[con][0]) + ':' + str(conexoes[con][1]))
+                        print('     ' + str(conexoes[con][0]) + ':' + str(conexoes[con][1]))
                     print('')
                     
                 elif comando == 'help' :
                     print("\ndigite 'historico' para exibir as conexões vigentes")    
-                    print("digite 'encerrar servidor' para encerrar o servidor. \nEsse serviço passará a não receber mais conexões com novos clientes, porém só será finalizado após todos os clientes vigentes terem encerrado suas respectivas conexões.\n Também não irá receber mais comandos de entrada padrão.\n")
+                    print("digite 'encerrar servidor' para encerrar o servidor. \nEsse serviço passará a não receber mais conexões com novos clientes, porém só será finalizado após todos os clientes vigentes terem encerrado suas respectivas conexões.\nTambém não irá receber mais comandos de entrada padrão.\n")
                     
                 elif comando == 'encerrar servidor':
+                    print("Servidor fechado para conexões e entradas padrões. Aguardando finalização por parte dos clientes ativos.")
                     for c in clientes:
                         c.join()
+                    print("Servidor encerrado.")
                     server_socket.close()
                     sys.exit()
                     
