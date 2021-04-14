@@ -173,7 +173,7 @@ while True:
                 print("digite 'encerrar servidor' para encerrar o servidor. \n Esse serviço passará a não receber mais conexões com novos clientes, porém só será finalizado após todos os clientes vigentes terem encerrado suas respectivas conexões.\n Também não irá receber mais comandos de entrada padrão.")
                 print("digite 'historico' para exibir as conexões vigentes")    
                 
-            elif comando == 'encerra servidor':
+            elif comando == 'encerrar servidor':
                 for c in clientes:
                     c.join()
                 server_socket.close()
